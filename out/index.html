@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leg Processor</title>
+
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+    
+    <div class="container">
+
+        <div class="registers">
+            <table style="width: 100%;">
+                <tr>
+                    <th>Register</th>
+                    <th>Value</th>
+                </tr>
+    
+                <tr>
+                    <td>R0</td>
+                    <td id="R0">0</td>
+                </tr>
+                <tr>
+                    <td>R1</td>
+                    <td id="R1">0</td>
+                </tr>
+                <tr>
+                    <td>R2</td>
+                    <td id="R2">0</td>
+                </tr>
+                <tr>
+                    <td>R3</td>
+                    <td id="R3">0</td>
+                </tr>
+                <tr>
+                    <td>R4</td>
+                    <td id="R4">0</td>
+                </tr>
+                <tr>
+                    <td>R5</td>
+                    <td id="R5">0</td>
+                </tr>
+                <tr>
+                    <td>R6</td>
+                    <td id="R6">0</td>
+                </tr>
+                <tr>
+                    <td>R7</td>
+                    <td id="R7">0</td>
+                </tr>
+                <tr>
+                    <td>R8</td>
+                    <td id="R8">0</td>
+                </tr>
+                <tr>
+                    <td>R9</td>
+                    <td id="R9">0</td>
+                </tr>
+                <tr>
+                    <td>R10</td>
+                    <td id="R10">0</td>
+                </tr>
+                <tr>
+                    <td>R11</td>
+                    <td id="R11">0</td>
+                </tr>
+                <tr>
+                    <td>R12</td>
+                    <td id="R12">0</td>
+                </tr>
+                <tr>
+                    <td>R13</td>
+                    <td id="R13">0</td>
+                </tr>
+                <tr>
+                    <td>R14</td>
+                    <td id="R14">0</td>
+                </tr>
+                <tr>
+                    <td>R15</td>
+                    <td id="R15">0</td>
+                </tr>
+                <tr>
+                    <td>PC</td>
+                    <td id="R16">0</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="teletype">
+            <p><span class="blank">TTY 0.1</span></p>
+            <textarea spellcheck="false" id="output" readonly="true"></textarea>
+        </div>
+
+        <div class="editor">
+            <p><span class="blank">Editor</span></p>
+            <textarea spellcheck="false" id="input"></textarea>
+            <p>
+                1<span class="blank">RUN</span>
+                2<span class="blank">STOP</span>
+                3<span class="blank">STEP</span>
+                4<span class="blank">LOAD</span>
+                5<span class="blank">SAVE</span>
+            </p>
+        </div>
+
+        <div class="control-pad">
+            <div class="buttons">
+                <button id="run-btn">Run</button>
+                <button id="stop-btn">Stop</button>
+                <button id="step-btn">Step</button>
+            </div>
+
+            <div class="current-inst">
+                <p>Current Instruction</p>
+                <div>
+                    <p>MOV</p>
+                    <p>R0</p>
+                    <p>100</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="./js/main.js" type="module"></script>
+</body>
+</html>

@@ -120,6 +120,7 @@ export class Lexer
                 case "halt":    return new BaseToken(TokType.Halt);
                 case "nop":     return new BaseToken(TokType.Nop);
                 case "inc":     return new BaseToken(TokType.Inc);
+                case "dec":     return new BaseToken(TokType.Inc);
 
                 case "jmp":     return new BaseToken(TokType.Jmp);
                 case "cmp":     return new BaseToken(TokType.Cmp);

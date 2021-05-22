@@ -5,7 +5,7 @@ enum TokType
     Halt = 0,
     Nop,
     Mov,
-    Inc,
+    Inc, Dec,
     Push, Pop,
     Add, Sub, Mul, Div, Mod, Cmp,
     Ld, Str,

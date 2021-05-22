@@ -11,6 +11,8 @@ document.addEventListener("DOMContentLoaded", ()=> {
     const stopBtn = document.getElementById("stop-btn") as HTMLButtonElement;
     const stepBtn = document.getElementById("stop-btn") as HTMLButtonElement;
     
+    const fileUpload = document.getElementById("upload") as HTMLInputElement;
+
     const editor = document.getElementById("input") as HTMLTextAreaElement;
     const tty_out = document.getElementById("output") as HTMLTextAreaElement;
     
@@ -71,14 +73,51 @@ document.addEventListener("DOMContentLoaded", ()=> {
         clearInterval(exec);
         exec = 0;
     }
+
+    async function saveFile() {
+        let blob = new Blob([editor.value], {type : "application/text"});
+        let url = URL.createObjectURL(blob);
+
+        let tmp = document.getElementById("download") as any;
+
+        tmp.style.display = "none";
+        tmp.href = url;
+        tmp.setAttribute("download", "code.lasm");
+
+        tmp.click();
+
+        setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+        }, 100);
+    }
+
+    async function loadFile() {
+        fileUpload.click();
+    }
+
+    document.addEventListener("change", () => {
+        let file = (fileUpload.files as FileList)[0];
+        let reader = new FileReader();
+
+        reader.readAsText(file, "UTF-8");
+        reader.onload = (e) => {
+            editor.value = e.target?.result as string;
+        }
+        reader.onerror = (e) => {
+            throw new Error("Couldn't load file");
+        }
+
+    }, false);
     
     document.addEventListener("keydown", (e) => {
-        //console.log(e.keyCode);
+        console.log(e.keyCode);
     
         switch (e.keyCode)
         {
             case 112: runVM(); break;
             case 113: stopVM(); break;
+            case 114: loadFile(); break;
+            case 115: saveFile(); break;
         }
     });
 

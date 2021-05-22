@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { VirtualMachine } from "./virtual-machine/virtual-machine.js";
 import { Compiler } from "./compiler/compiler.js";
 import { Parser } from "./compiler/parser.js";
@@ -7,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const runBtn = document.getElementById("run-btn");
     const stopBtn = document.getElementById("stop-btn");
     const stepBtn = document.getElementById("stop-btn");
+    const fileUpload = document.getElementById("upload");
     const editor = document.getElementById("input");
     const tty_out = document.getElementById("output");
     const tty = new TeleType(tty_out);
@@ -48,14 +58,51 @@ document.addEventListener("DOMContentLoaded", () => {
         clearInterval(exec);
         exec = 0;
     }
+    function saveFile() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let blob = new Blob([editor.value], { type: "application/text" });
+            let url = URL.createObjectURL(blob);
+            let tmp = document.getElementById("download");
+            tmp.style.display = "none";
+            tmp.href = url;
+            tmp.setAttribute("download", "code.lasm");
+            tmp.click();
+            setTimeout(() => {
+                window.URL.revokeObjectURL(url);
+            }, 100);
+        });
+    }
+    function loadFile() {
+        return __awaiter(this, void 0, void 0, function* () {
+            fileUpload.click();
+        });
+    }
+    document.addEventListener("change", () => {
+        let file = fileUpload.files[0];
+        let reader = new FileReader();
+        reader.readAsText(file, "UTF-8");
+        reader.onload = (e) => {
+            var _a;
+            editor.value = (_a = e.target) === null || _a === void 0 ? void 0 : _a.result;
+        };
+        reader.onerror = (e) => {
+            throw new Error("Couldn't load file");
+        };
+    }, false);
     document.addEventListener("keydown", (e) => {
-        //console.log(e.keyCode);
+        console.log(e.keyCode);
         switch (e.keyCode) {
             case 112:
                 runVM();
                 break;
             case 113:
                 stopVM();
+                break;
+            case 114:
+                loadFile();
+                break;
+            case 115:
+                saveFile();
                 break;
         }
     });

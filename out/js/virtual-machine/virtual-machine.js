@@ -175,6 +175,14 @@ export class VirtualMachine {
                     this.registers[reg] += 1;
                 }
                 break;
+            case TokType.Dec:
+                {
+                    let reg = this.nextByte();
+                    if (reg > 15)
+                        throw new Error("Max register is r15");
+                    this.registers[reg] -= 1;
+                }
+                break;
             case TokType.Ret:
                 {
                     this.pc[0] = this.callStack.pop();

@@ -65,23 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
 /*
 function main()
 {
-    const src = `log_sum:
-
-    mov r0, r1
-    printr
-    mov r0, str1
-    print
-    mov r0, r2
-    printr
-    mov r0, str2
-    printr
-    add r1, r2
-    printr
-    
-    ret
-    
-    str1: ds " + "
-    str2: ds " is "`;
+    const src = `dec r1`;
 
     let lexer = new Lexer(src);
     let tokens = lexer.tokenize();
@@ -103,5 +87,5 @@ function main()
 }
 
 main();
-*/ 
+*/
 //# sourceMappingURL=main.js.map

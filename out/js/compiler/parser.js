@@ -12,6 +12,7 @@ export class Parser {
             [TokType.Ret],
             [TokType.Jmp, TokType.Number],
             [TokType.Jmp, TokType.LabelDeref],
+            [TokType.Dec, TokType.Register],
             [TokType.Inc, TokType.Register],
             [TokType.Push, TokType.Register],
             [TokType.Pop, TokType.Register],

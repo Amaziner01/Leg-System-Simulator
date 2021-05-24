@@ -109,7 +109,7 @@ export class Parser
             }
 
             if (offset == 0) 
-                throw new Error(`Not supported instruction at line ${lineNo}. [${this.tokens[i].type}]`);
+                throw new Error(`Unsupported instruction at line ${lineNo}. [${this.tokens[i].type}]`);
 
         }
 

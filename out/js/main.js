@@ -55,12 +55,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     catch (e) {
                         tty.error(e);
                         clearInterval(exec);
+                        runBtn.innerHTML = "Run";
                     }
                 }
             }, 1);
         }
         catch (e) {
             tty.error(e);
+            runBtn.innerHTML = "Run";
         }
     }
     function stopVirtualMachine() {

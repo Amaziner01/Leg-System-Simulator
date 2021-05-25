@@ -87,6 +87,7 @@ document.addEventListener("DOMContentLoaded", ()=> {
                     {
                         tty.error(e);
                         clearInterval(exec);
+                        runBtn.innerHTML = "Run";
                     }
                 }
     
@@ -95,6 +96,7 @@ document.addEventListener("DOMContentLoaded", ()=> {
         catch(e)
         {
             tty.error(e);
+            runBtn.innerHTML = "Run";
         }
     
     }

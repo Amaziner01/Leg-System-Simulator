@@ -1,6 +1,6 @@
 import { TokType } from "../common/types.js";
 export class VirtualMachine {
-    constructor(out) {
+    constructor(out, currInst) {
         this.registers = new Int16Array(16);
         this.pc = new Uint16Array(1);
         this.zeroFlag = false;
@@ -9,6 +9,7 @@ export class VirtualMachine {
         this.stack = [];
         this.callStack = [];
         this.tty = out;
+        this.currInst = currInst;
     }
     reset() {
         this.registers.fill(0);
@@ -36,61 +37,51 @@ export class VirtualMachine {
     }
     cycle() {
         var _a, _b;
+        let opcodeIns = "";
+        let secondCode = "";
+        let thirdCode = "";
+        let running = true;
         if (this.memory == null)
             return false;
         let opcode = this.nextByte();
-        if (opcode == TokType.Halt)
-            return false;
-        if (opcode == TokType.Nop)
-            return true;
-        if (opcode == TokType.Print) {
-            let start = this.registers[0];
-            let str = "";
-            let code;
-            while ((code = this.memory[start]) != 0) {
-                str += String.fromCharCode(code);
-                start++;
-            }
-            console.log(str);
-            if (typeof this.tty !== undefined)
-                (_a = this.tty) === null || _a === void 0 ? void 0 : _a.print(str);
-            return true;
-        }
-        if (opcode == TokType.PrintR) {
-            console.log(this.registers[0]);
-            if (typeof this.tty !== undefined)
-                (_b = this.tty) === null || _b === void 0 ? void 0 : _b.print(this.registers[0].toString());
-            return true;
-        }
+        if (opcode > TokType.PrintR)
+            throw new Error(`Unknown instruction. [${opcode}]`);
         if (opcode >= TokType.Add && opcode <= TokType.Cmp) {
             let lreg = this.nextByte();
             let rreg = this.nextByte();
             if ((lreg | rreg) > 15)
                 throw new Error("Max register is r15");
+            secondCode = "R" + lreg.toString();
+            thirdCode = "R" + rreg.toString();
             switch (opcode) {
                 case TokType.Add:
                     {
                         this.registers[0] = this.registers[lreg] + this.registers[rreg];
+                        opcodeIns = "ADD";
                     }
                     break;
                 case TokType.Sub:
                     {
                         this.registers[0] = this.registers[lreg] - this.registers[rreg];
+                        opcodeIns = "SUB";
                     }
                     break;
                 case TokType.Mul:
                     {
                         this.registers[0] = this.registers[lreg] * this.registers[rreg];
+                        opcodeIns = "MUL";
                     }
                     break;
                 case TokType.Div:
                     {
                         this.registers[0] = this.registers[lreg] / this.registers[rreg];
+                        opcodeIns = "DIV";
                     }
                     break;
                 case TokType.Mod:
                     {
                         this.registers[0] = this.registers[lreg] % this.registers[rreg];
+                        opcodeIns = "MOD";
                     }
                     break;
                 default:
@@ -98,121 +89,197 @@ export class VirtualMachine {
                         let result = this.registers[lreg] - this.registers[rreg];
                         this.zeroFlag = result == 0;
                         this.negFlag = result < 0;
+                        opcodeIns = "CMP";
                     }
                     break;
             }
-            return true;
         }
-        if (opcode >= TokType.Jmp && opcode <= TokType.Call) {
+        else if (opcode >= TokType.Jmp && opcode <= TokType.Call) {
             let num = this.nextWord();
             if (num >= 0x1000)
                 throw new Error("Memory location out of bounds.");
+            secondCode = num.toString();
+            thirdCode = "";
             let jmp = false;
             switch (opcode) {
                 case TokType.Jmp:
-                    jmp = true;
-                    break;
-                case TokType.Jeq:
-                    jmp = this.zeroFlag;
-                    break;
-                case TokType.Jne:
-                    jmp = !this.zeroFlag;
-                    break;
-                case TokType.Jl:
-                    jmp = this.negFlag;
-                    break;
-                case TokType.Jle:
-                    jmp = this.negFlag || this.zeroFlag;
-                    break;
-                case TokType.Jg:
-                    jmp = !this.negFlag && !this.zeroFlag;
-                    break;
-                case TokType.Jge:
-                    jmp = !this.negFlag;
-                    break;
-                default:
                     {
                         jmp = true;
+                        opcodeIns = "JMP";
+                    }
+                    break;
+                case TokType.Jeq:
+                    {
+                        jmp = this.zeroFlag;
+                        opcodeIns = "JEQ";
+                    }
+                    break;
+                case TokType.Jne:
+                    {
+                        jmp = !this.zeroFlag;
+                        opcodeIns = "JNE";
+                    }
+                    break;
+                case TokType.Jl:
+                    {
+                        jmp = this.negFlag;
+                        opcodeIns = "JL";
+                    }
+                    break;
+                case TokType.Jle:
+                    {
+                        jmp = this.negFlag || this.zeroFlag;
+                        opcodeIns = "JLE";
+                    }
+                    break;
+                case TokType.Jg:
+                    {
+                        jmp = !this.negFlag && !this.zeroFlag;
+                        opcodeIns = "JG";
+                    }
+                    break;
+                case TokType.Jge:
+                    {
+                        jmp = !this.negFlag;
+                        opcodeIns = "JGE";
+                    }
+                    break;
+                default:
+                    { // Call
+                        jmp = true;
                         this.callStack.push(this.pc[0]);
+                        opcodeIns = "CALL";
                     }
                     break;
             }
             if (jmp)
                 this.pc[0] = num;
-            return true;
         }
-        switch (opcode) {
-            case TokType.Mov:
-                {
-                    let reg = this.nextByte();
-                    if (reg > 15)
-                        throw new Error("Max register is r15");
-                    let num = this.nextWord();
-                    this.registers[reg] = num;
-                }
-                break;
-            case TokType.Push:
-                {
-                    let reg = this.nextByte();
-                    if (reg > 15)
-                        throw new Error("Max register is r15");
-                    this.stack.push(this.registers[reg]);
-                }
-                break;
-            case TokType.Pop:
-                {
-                    let reg = this.nextByte();
-                    if (reg > 15)
-                        throw new Error("Max register is r15");
-                    this.registers[reg] = this.stack.pop();
-                }
-                break;
-            case TokType.Inc:
-                {
-                    let reg = this.nextByte();
-                    if (reg > 15)
-                        throw new Error("Max register is r15");
-                    this.registers[reg] += 1;
-                }
-                break;
-            case TokType.Dec:
-                {
-                    let reg = this.nextByte();
-                    if (reg > 15)
-                        throw new Error("Max register is r15");
-                    this.registers[reg] -= 1;
-                }
-                break;
-            case TokType.Ret:
-                {
-                    this.pc[0] = this.callStack.pop();
-                }
-                break;
-            case TokType.Ld:
-                {
-                    let num = this.nextWord();
-                    if (num >= 0x1000)
-                        throw new Error("Memory location out of bounds.");
-                    let reg = this.nextByte();
-                    if (reg > 15)
-                        throw new Error("Max register is r15");
-                    this.registers[reg] = num;
-                }
-                break;
-            case TokType.Str:
-                {
-                    let reg = this.nextByte();
-                    if (reg > 15)
-                        throw new Error("Max register is r15");
-                    let num = this.nextWord();
-                    if (num >= 0x1000)
-                        throw new Error("Memory location out of bounds.");
-                    this.memory[num] = this.registers[reg];
-                }
-                break;
-            default: throw new Error(`Unknown instruction. [${opcode}]`);
+        else {
+            switch (opcode) {
+                case TokType.Halt:
+                    {
+                        running = false;
+                    }
+                    break;
+                case TokType.Nop: break;
+                case TokType.Print:
+                    {
+                        let start = this.registers[0];
+                        let str = "";
+                        let code;
+                        while ((code = this.memory[start]) != 0) {
+                            str += String.fromCharCode(code);
+                            start++;
+                        }
+                        console.log(str);
+                        if (typeof this.tty !== undefined)
+                            (_a = this.tty) === null || _a === void 0 ? void 0 : _a.print(str);
+                        opcodeIns = "PRINT";
+                    }
+                    break;
+                case TokType.PrintR:
+                    {
+                        console.log(this.registers[0]);
+                        if (typeof this.tty !== undefined)
+                            (_b = this.tty) === null || _b === void 0 ? void 0 : _b.print(this.registers[0].toString());
+                        opcodeIns = "PRINTR";
+                    }
+                    break;
+                case TokType.Mov:
+                    {
+                        let reg = this.nextByte();
+                        if (reg > 15)
+                            throw new Error("Max register is r15");
+                        let num = this.nextWord();
+                        this.registers[reg] = num;
+                        opcodeIns = "MOV";
+                        secondCode = "R" + reg.toString();
+                        thirdCode = num.toString();
+                    }
+                    break;
+                case TokType.Push:
+                    {
+                        let reg = this.nextByte();
+                        if (reg > 15)
+                            throw new Error("Max register is r15");
+                        this.stack.push(this.registers[reg]);
+                        opcodeIns = "PUSH";
+                        secondCode = "R" + reg.toString();
+                    }
+                    break;
+                case TokType.Pop:
+                    {
+                        let reg = this.nextByte();
+                        if (reg > 15)
+                            throw new Error("Max register is r15");
+                        this.registers[reg] = this.stack.pop();
+                        opcodeIns = "POP";
+                        secondCode = "R" + reg.toString();
+                    }
+                    break;
+                case TokType.Inc:
+                    {
+                        let reg = this.nextByte();
+                        if (reg > 15)
+                            throw new Error("Max register is r15");
+                        this.registers[reg] += 1;
+                        opcodeIns = "INC";
+                        secondCode = "R" + reg.toString();
+                    }
+                    break;
+                case TokType.Dec:
+                    {
+                        let reg = this.nextByte();
+                        if (reg > 15)
+                            throw new Error("Max register is r15");
+                        this.registers[reg] -= 1;
+                        opcodeIns = "DEC";
+                        secondCode = "R" + reg.toString();
+                    }
+                    break;
+                case TokType.Ret:
+                    {
+                        this.pc[0] = this.callStack.pop();
+                        opcodeIns = "RET";
+                    }
+                    break;
+                case TokType.Ld:
+                    {
+                        let num = this.nextWord();
+                        if (num >= 0x1000)
+                            throw new Error("Memory location out of bounds.");
+                        let reg = this.nextByte();
+                        if (reg > 15)
+                            throw new Error("Max register is r15");
+                        this.registers[reg] = num;
+                        opcodeIns = "LD";
+                        secondCode = num.toString();
+                        thirdCode = "R" + reg.toString();
+                    }
+                    break;
+                default:
+                    { // Str
+                        let reg = this.nextByte();
+                        if (reg > 15)
+                            throw new Error("Max register is r15");
+                        let num = this.nextWord();
+                        if (num >= 0x1000)
+                            throw new Error("Memory location out of bounds.");
+                        this.memory[num] = this.registers[reg];
+                        opcodeIns = "STR";
+                        secondCode = "R" + reg.toString();
+                        thirdCode = num.toString();
+                    }
+                    break;
+            }
         }
-        return true;
+        if (this.currInst != undefined) {
+            this.currInst[0].innerText = opcodeIns;
+            this.currInst[1].innerHTML = secondCode;
+            this.currInst[2].innerHTML = thirdCode;
+        }
+        return running;
     }
     run() {
         while (this.cycle())

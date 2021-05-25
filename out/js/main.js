@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import { VirtualMachine } from "./virtual-machine/virtual-machine.js";
 import { Compiler } from "./compiler/compiler.js";
 import { Parser } from "./compiler/parser.js";
@@ -19,22 +10,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const fileUpload = document.getElementById("upload");
     const editor = document.getElementById("input");
     const tty_out = document.getElementById("output");
+    let Regs = Array(17);
+    let Instructions = Array(3);
+    for (let i = 0; i < 17; i++)
+        Regs[i] = document.getElementById("R" + i.toString());
+    for (let i = 0; i < 3; i++)
+        Instructions[i] = document.getElementById("ins" + i.toString());
+    console.log(Instructions);
     const tty = new TeleType(tty_out);
-    const vm = new VirtualMachine(tty);
+    const vm = new VirtualMachine(tty, Instructions);
     let paused = false;
     let exec = 0;
     stopBtn.style.pointerEvents = "none";
-    stepBtn.style.pointerEvents = "none";
-    let Regs = Array(17);
-    for (let i = 0; i < 17; i++)
-        Regs[i] = document.getElementById("R" + i.toString());
     tty.clear();
     function runVirtualMachine() {
         tty.clear();
         clearInterval(exec);
         runBtn.innerHTML = "Stop";
         stopBtn.style.pointerEvents = "all";
-        stepBtn.style.pointerEvents = "all";
         try {
             let lexer = new Lexer(editor.value);
             let parser = new Parser(lexer.tokenize());
@@ -46,6 +39,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!paused) {
                     try {
                         let running = vm.cycle();
+                        Instructions[0].innerHTML = "";
+                        Instructions[1].innerHTML = "";
+                        Instructions[2].innerHTML = "";
                         for (let i = 0; i < 16; i++)
                             Regs[i].innerHTML = vm.registers[i].toString();
                         Regs[16].innerHTML = vm.pc[0].toString();
@@ -53,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             tty.print("System Halted!");
                             clearInterval(exec);
                             exec = 0;
+                            runBtn.innerHTML = "Run";
                         }
                     }
                     catch (e) {
@@ -75,7 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
         tty.print("System Stopped.");
         runBtn.innerHTML = "Run";
         stopBtn.style.pointerEvents = "none";
-        stepBtn.style.pointerEvents = "none";
     }
     function pauseVirtualMachine() {
         paused = true;
@@ -86,23 +82,19 @@ document.addEventListener("DOMContentLoaded", () => {
         stopBtn.innerHTML = "Pause";
     }
     function saveFile() {
-        return __awaiter(this, void 0, void 0, function* () {
-            let blob = new Blob([editor.value], { type: "application/text" });
-            let url = URL.createObjectURL(blob);
-            let tmp = document.getElementById("download");
-            tmp.style.display = "none";
-            tmp.href = url;
-            tmp.setAttribute("download", "code.lasm");
-            tmp.click();
-            setTimeout(() => {
-                window.URL.revokeObjectURL(url);
-            }, 100);
-        });
+        let blob = new Blob([editor.value], { type: "application/text" });
+        let url = URL.createObjectURL(blob);
+        let tmp = document.getElementById("download");
+        tmp.style.display = "none";
+        tmp.href = url;
+        tmp.setAttribute("download", "code.lasm");
+        tmp.click();
+        setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+        }, 100);
     }
     function loadFile() {
-        return __awaiter(this, void 0, void 0, function* () {
-            fileUpload.click();
-        });
+        fileUpload.click();
     }
     document.addEventListener("change", () => {
         if (fileUpload == null)
@@ -142,17 +134,22 @@ document.addEventListener("DOMContentLoaded", () => {
         exec == 0 ? runVirtualMachine() : stopVirtualMachine();
     };
     stepBtn.onclick = () => {
-        if (exec == 0)
+        if (exec == 0) {
+            runVirtualMachine();
+            pauseVirtualMachine();
             return;
+        }
         if (!paused)
             pauseVirtualMachine();
-        let halted = vm.cycle();
+        let running = vm.cycle();
         for (let i = 0; i < 16; i++)
             Regs[i].innerHTML = vm.registers[i].toString();
         Regs[16].innerHTML = vm.pc[0].toString();
-        if (!halted) {
+        if (!running) {
+            tty.print("System Halted!");
             clearInterval(exec);
             exec = 0;
+            runBtn.innerHTML = "Run";
         }
     };
 });

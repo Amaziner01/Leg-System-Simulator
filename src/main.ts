@@ -16,22 +16,26 @@ document.addEventListener("DOMContentLoaded", ()=> {
     const editor = document.getElementById("input") as HTMLTextAreaElement;
     const tty_out = document.getElementById("output") as HTMLTextAreaElement;
     
+    let Regs = Array<HTMLElement>(17);
+    let Instructions = Array<HTMLElement>(3);
+
+    for (let i = 0; i < 17; i++)
+        Regs[i] = document.getElementById("R" + i.toString()) as HTMLElement;
+    
+    for (let i = 0; i < 3; i++)
+        Instructions[i] = document.getElementById("ins" + i.toString()) as HTMLElement;
+
+    console.log(Instructions);
+    
     const tty = new TeleType(tty_out);
-    const vm = new VirtualMachine(tty);
+    const vm = new VirtualMachine(tty, Instructions);
 
     let paused = false;
 
     let exec = 0;
 
     stopBtn.style.pointerEvents = "none";
-    stepBtn.style.pointerEvents = "none";
-    
 
-    let Regs = Array<HTMLElement>(17);
-
-    for(let i = 0; i < 17; i++)
-        Regs[i] = document.getElementById("R" + i.toString()) as HTMLElement;
-    
     tty.clear();
 
     function runVirtualMachine() 
@@ -41,7 +45,6 @@ document.addEventListener("DOMContentLoaded", ()=> {
         runBtn.innerHTML = "Stop";
 
         stopBtn.style.pointerEvents = "all";
-        stepBtn.style.pointerEvents = "all";
         
         try {
 
@@ -62,6 +65,11 @@ document.addEventListener("DOMContentLoaded", ()=> {
                     try
                     {
                         let running = vm.cycle();
+
+                        Instructions[0].innerHTML = "";
+                        Instructions[1].innerHTML = "";
+                        Instructions[2].innerHTML = "";
+                        
                         for (let i = 0; i < 16; i++)
                         Regs[i].innerHTML = vm.registers[i].toString();
                     
@@ -72,6 +80,7 @@ document.addEventListener("DOMContentLoaded", ()=> {
                             tty.print("System Halted!");
                             clearInterval(exec);
                             exec = 0;
+                            runBtn.innerHTML = "Run";
                         }
                     }
                     catch (e)
@@ -99,7 +108,6 @@ document.addEventListener("DOMContentLoaded", ()=> {
         tty.print("System Stopped.");
         runBtn.innerHTML = "Run";
         stopBtn.style.pointerEvents = "none";
-        stepBtn.style.pointerEvents = "none";
 
     }
     
@@ -113,7 +121,7 @@ document.addEventListener("DOMContentLoaded", ()=> {
         stopBtn.innerHTML = "Pause";
     }
 
-    async function saveFile() {
+    function saveFile() {
         let blob = new Blob([editor.value], {type : "application/text"});
         let url = URL.createObjectURL(blob);
 
@@ -130,7 +138,7 @@ document.addEventListener("DOMContentLoaded", ()=> {
         }, 100);
     }
 
-    async function loadFile() {
+    function loadFile() {
         fileUpload.click();
     }
 
@@ -173,20 +181,27 @@ document.addEventListener("DOMContentLoaded", ()=> {
 
 
     stepBtn.onclick = () => {
-        if (exec == 0) return;
+        if (exec == 0) 
+        {
+            runVirtualMachine();
+            pauseVirtualMachine();
+            return;
+        }
 
         if (!paused) pauseVirtualMachine();
 
-        let halted = vm.cycle();
+        let running = vm.cycle();
         for (let i = 0; i < 16; i++)
             Regs[i].innerHTML = vm.registers[i].toString();
                     
         Regs[16].innerHTML = vm.pc[0].toString();
 
-        if (!halted)
+        if (!running)
         {
+            tty.print("System Halted!");
             clearInterval(exec);
             exec = 0;
+            runBtn.innerHTML = "Run";
         }
     }
 });

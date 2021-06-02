@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leg Processor</title>
+    <title>Leg System Simulator</title>
 
     <link rel="stylesheet" href="./css/styles.css">
 </head>
@@ -91,14 +91,14 @@
         </div>
 
         <div class="teletype">
-            <p><span class="blank">TTY 0.1</span></p>
+            <p style="width: 100%;"><span class="blank">TTY 0.1</span></p>
             <textarea spellcheck="false" id="output" readonly="true"></textarea>
         </div>
 
         <div class="editor">
-            <p><span class="blank">Editor</span></p>
-            <textarea spellcheck="false" id="input"></textarea>
-            <p>
+            <p><span class="blank header">Editor</span></p>
+            <textarea spellcheck="false" wrap="soft" id="input"></textarea>
+            <p class="bottom">
                 1<span class="blank">RUN</span>
                 2<span class="blank">STOP</span>
                 3<span class="blank">LOAD</span>
@@ -122,6 +122,7 @@
                 </div>
             </div>
         </div>
+        <p>Can't understand a thing? Check out the <a href="../docs/Leg System Documentation.pdf">Documentation</a>!</p>
     </div>
 
     <a id="download" style="display: none;"></a>

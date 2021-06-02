@@ -24,8 +24,6 @@ document.addEventListener("DOMContentLoaded", ()=> {
     
     for (let i = 0; i < 3; i++)
         Instructions[i] = document.getElementById("ins" + i.toString()) as HTMLElement;
-
-    console.log(Instructions);
     
     const tty = new TeleType(tty_out);
     const vm = new VirtualMachine(tty, Instructions);
@@ -180,7 +178,6 @@ document.addEventListener("DOMContentLoaded", ()=> {
     runBtn.onclick = () => {
         exec == 0 ? runVirtualMachine() : stopVirtualMachine();
     }
-
 
     stepBtn.onclick = () => {
         if (exec == 0) 

@@ -20,6 +20,8 @@ body {
 .blank {
     background: white;
     color: black;
+    padding-top: 2px;
+    padding-left: 2px;
 }
 
 .container {
@@ -39,7 +41,8 @@ body {
 
 p {
     color: white;
-    line-height: 0.8em;
+    padding-top: 1px;
+    line-height: 1em;
     margin: 0;
 }
 
@@ -51,6 +54,15 @@ textarea {
     resize: none;
     border: none;
     outline: none;
+}
+
+.bottom {
+    position: absolute;
+    bottom: 0;
+}
+
+.header {
+    width: 100%;
 }
 
 .registers {
@@ -67,11 +79,12 @@ textarea {
 /* Editor */
 .editor {
     background: black;
-    
+    position: relative;   
 }
 
+
 .editor textarea {
-    height: 86%;
+    height: 87%;
 }        
 
 /* Teletype */
@@ -81,7 +94,7 @@ textarea {
 }
 
 .teletype textarea {
-    height: 92%;
+    height: 91%;
 }
 
 

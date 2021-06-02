@@ -1,0 +1,168 @@
+
+\documentclass[oneside]{book}
+\usepackage{fancyvrb}
+\usepackage{titlesec}
+
+\title{Leg Chip Documentation}
+\date{2021-05-26}
+\author{Amaziner01}
+
+\titlespacing*{\subsection}
+{10pt}{30pt}{0pt}
+
+\setlength{\parskip}{\baselineskip}%
+\setlength{\parindent}{0pt}%
+
+\begin{document}
+  \pagenumbering{gobble}
+  \maketitle
+  \newpage
+  \pagenumbering{arabic}
+
+\tableofcontents
+\clearpage
+
+\chapter{Assembly}
+
+Leg System is an imaginary machine made for the sake of learning, and to hopefully help others to understand how computers work using graphics and a custom oversimplified x86 Assembly subset. It was made using TypeScript, HTML5 and CSS.
+
+\section{Getting Started}
+
+When getting started of something, it is important to get a "Hello World" working first. In this machine it would be defining a string with the \textbf{ds} directive (define string) and using the \textbf{print} instruction to display it on the Teletype as shown in the code snippet bellow:
+
+\begin{Verbatim}
+mov r0, string
+print
+halt
+
+string: ds "Hello World!\n"
+\end{Verbatim}
+
+
+\chapter{Virtual Machine Specifications}
+
+The main objective of this project was that it would hopefully be ismple enough so peoplle won't need much knowledge about computers to fully understand it. This machine consists of 17 registers, 2 flags, and 2 stacks.
+
+You have 16 general purpose registers and the program counter. Only those general purpose registers, identified as r0, r1, ...r15, are accesible from code.
+
+There are only two flags on the system, the Negative Flag and the Zero Flag. Those are used to do comparisons in code using the \textbf{cmp} instruction.
+
+You also have two stacks, the general stack and the call stack. I decided to put function calls in a different stack so there would be no conflicts when pushing and popping from the general stack. There limit of elements you can push on the stack depends on your computer (it is not strictly limited).
+
+Also, the memory of the virtual machine depends on the capabilities of your computer, so you have some freedom when it comes to creating programs for it.
+
+
+\chapter{System Instructions}
+Mnemonics: 
+\begin{itemize}
+	\item RR - Register (r0 - r15)
+	\item NNNN - Literal number value (0 - 65535)
+\end{itemize}
+
+  \section{Processor}
+  \addtocontents{toc}{\protect\setcounter{tocdepth}{1}}
+
+  \subsection{Halt}
+Finishes execution of the program.
+\begin{Verbatim}
+Example: halt
+\end{Verbatim}
+
+  \subsection{Nop}
+Does nothing, just takes 1 cycle.
+\begin{Verbatim}
+Example: nop
+\end{Verbatim}
+
+  \section{Register}
+
+ \subsection{Mov}
+Sets register value as the specified number.
+\begin{Verbatim}
+Example: mov RR, NNNN
+\end{Verbatim}
+
+  \section{Stack}
+
+ \subsection{Push}
+Puts value of specified register in the top of the stack, so it can be retrieved later.
+\begin{Verbatim}
+Example: push RR
+\end{Verbatim}
+
+ \subsection{Pop}
+Retrieves value from the top of the stack and writes it in the specified register, removing it afterwards from the stack. If the stack is empty and the Pop instruction is called, it is going to return the value 0.
+\begin{Verbatim}
+Example: pop RR
+\end{Verbatim}
+
+ \subsection{Print}
+Uses the value in register zero as a pointer to a string and print every character in the Teletype until it finds a zero in memory. 
+\begin{Verbatim}
+Example: print
+\end{Verbatim}
+
+ \subsection{PrintR}
+Prints the value of the register in the Teletype.
+\begin{Verbatim}
+Example: pop RR
+\end{Verbatim}
+
+  \section{Arithmetic}
+
+ \subsection{Add}
+Add the values of the two specified registers and puts it into register zero (r0).
+\begin{Verbatim}
+Example: add RR, RR
+\end{Verbatim}
+
+ \subsection{Sub}
+Subtracts the values of the two specified registers and puts it into registerzero (r0).
+\begin{Verbatim}
+Example: sub RR, RR
+\end{Verbatim}
+
+ \subsection{Mul}
+Multiplies the values of the two specified registers and puts it into register zero (r0).
+\begin{Verbatim}
+Example: mul RR, RR
+\end{Verbatim}
+
+ \subsection{Div}
+Divides the values of the two specified registers and puts it into register zero (r0).
+\begin{Verbatim}
+Example: div RR, RR
+\end{Verbatim}
+
+ \subsection{Mod}
+Gets the module of the two specified registers and puts it into register zero (r0).
+\begin{Verbatim}
+Example: mod RR, RR
+\end{Verbatim}
+
+  \section{Logic}
+ \subsection{Jmp}
+Sets the program counterto the number or the label name (if the label exists in the program) specified.
+\begin{Verbatim}
+Example: jmp NNNN
+\end{Verbatim}
+
+ \subsection{Cmp}
+Compare the values of the two specified registers. In essence it is a substraction that is not saved in the register zero. If the result is negative sets the Negative Flag to on, and if it is zero, it sets the Zero Flag to on.
+\begin{Verbatim}
+Example: cmp RR, RR
+\end{Verbatim}
+
+  \section{Subroutines}
+\clearpage
+
+\chapter{Example Code}
+\clearpage
+
+\chapter{Useful Tricks}
+\clearpage
+
+\chapter{Simulator}
+\clearpage
+
+\end{document}
